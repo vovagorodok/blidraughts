@@ -76,7 +76,7 @@
     "@types/d3": "4.13.2",
     "@types/lodash-es": "4.17.3",
     "capacitor-scan": "github:roepstoep/capacitor-scan#de053e9c4b21ff17034751803694697b308da33c",
-    "capacitor-sound-effect": "github:roepstoep/capacitor-sound-effect#1fffa08798f5da1a91c595797a5a1de7271c40bb",
+    "capacitor-sound-effect": "https://github.com/vovagorodok/capacitor-sound-effect",
     "d3-axis": "1.0.8",
     "d3-scale": "1.0.6",
     "d3-selection": "1.1.0",
