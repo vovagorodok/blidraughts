@@ -5,10 +5,7 @@ export class ScanWeb extends WebPlugin implements ScanPlugin {
   private worker?: Worker
 
   constructor() {
-    super({
-      name: 'Scan',
-      platforms: ['web']
-    })
+    super()
   }
 
   async getMaxMemory(): Promise<{ value: number }> {

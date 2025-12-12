@@ -54,6 +54,15 @@ interface LidraughtsOptions {
   cpuArch: string
 }
 
+type RequestIdleCallbackHandle = any
+type RequestIdleCallbackOptions = {
+  timeout: number
+}
+type RequestIdleCallbackDeadline = {
+  readonly didTimeout: boolean
+  timeRemaining: (() => number)
+}
+
 interface Window {
   lidraughts: LidraughtsOptions
   Shepherd: TetherShepherd.ShepherdStatic
@@ -69,6 +78,11 @@ interface Window {
     cpuCores: number
     scanMaxMemory: number
   }
+  requestIdleCallback?: ((
+    callback: ((deadline: RequestIdleCallbackDeadline) => void),
+    opts?: RequestIdleCallbackOptions,
+  ) => RequestIdleCallbackHandle)
+  cancelIdleCallback?: ((handle: RequestIdleCallbackHandle) => void)
 }
 
 interface Piece {
