@@ -11,6 +11,7 @@ import continuePopup from '../shared/continuePopup'
 import pasteFenPopup from './pasteFenPopup'
 import EditorCtrl from './EditorCtrl'
 import menu from './menu'
+import external from '../../externalDevice'
 
 export default function view(ctrl: EditorCtrl) {
   const color = ctrl.draughtsground.state.orientation
@@ -77,6 +78,11 @@ function renderActionsBar(ctrl: EditorCtrl) {
       disabled: !ctrl.data.playable,
       oncreate: helper.ontap(ctrl.goToAnalyse, () => Toast.show({ text: i18n('analysis'), duration: 'short', position: 'bottom' }))
     }),
+    external.features().getState ? h('button.action_bar_button.fa.fa-clone', {
+      disabled: !external.state().peripheral.isGettable,
+      oncreate: helper.ontap(ctrl.loadPeripheralFen,
+        () => Toast.show({ text: i18n('loadAPositionFromDevice'), duration: 'short', position: 'bottom' }))
+    }) : null,
     h('button.action_bar_button.fa.fa-upload', {
       oncreate: helper.ontap(ctrl.pasteFenPopup.open,
         () => Toast.show({ text: i18n('loadAPositionFromFen'), duration: 'short', position: 'bottom' }))

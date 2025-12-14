@@ -1,0 +1,71 @@
+import { Protocol } from './Protocol'
+import { State } from '../draughtsground/state'
+import { GameStatus } from '../lidraughts/interfaces/game'
+import { dummyProtocol } from './dummy/DummyProtocol'
+
+export class BaseProtocol implements Protocol {
+  private state?: BaseState
+
+  transitionTo(state: BaseState) {
+    this.state = state
+    this.state.setContext(this)
+    this.state.onEnter()
+  }
+
+  init(_st: State) {}
+  features() { return dummyProtocol.features() }
+  variants() { return dummyProtocol.variants() }
+  options() { return dummyProtocol.options() }
+
+  onPeripheralCommand(cmd: string) {
+    this.state?.onPeripheralCommand(cmd)
+  }
+  onCentralStateCreated(st: State) {
+    this.state?.onCentralStateCreated(st)
+  }
+  onCentralStateChanged() {
+    this.state?.onCentralStateChanged()
+  }
+  onCentralStateShifted(shift: Shift) {
+    this.state?.onCentralStateShifted(shift)
+  }
+  onCentralStateEnded(status?: GameStatus) {
+    this.state?.onCentralStateEnded(status)
+  }
+  onMoveRejectedByCentral() {
+    this.state?.onMoveRejectedByCentral()
+  }
+  onCentralGetState() {
+    this.state?.onCentralGetState()
+  }
+  onCentralSetState() {
+    this.state?.onCentralSetState()
+  }
+  onCentralOptionsReset() {
+    this.state?.onCentralOptionsReset()
+  }
+}
+const dummyBaseProtocol = new BaseProtocol
+
+export class BaseState {
+  protected context: any = dummyBaseProtocol
+
+  setContext(context: BaseProtocol) {
+    this.context = context
+  }
+  transitionTo(state: BaseState) {
+    this.context.transitionTo(state)
+  }
+
+  onEnter() {}
+  onPeripheralCommand(_cmd: string) {}
+  onCentralStateCreated(_st: State) {}
+  onCentralStateChanged() {}
+  onCentralStateShifted(_shift: Shift) {}
+  onCentralStateEnded(_status?: GameStatus) {}
+  onMoveRejectedByCentral() {}
+
+  onCentralGetState() {}
+  onCentralSetState() {}
+  onCentralOptionsReset() {}
+}

@@ -8,6 +8,8 @@ import fen from './fen'
 import { renderBoard, makeCoords, makeFieldnumbers } from './render'
 import { anim, skip as skipAnim } from './anim'
 import * as drag from './drag'
+import external from '../externalDevice'
+import { GameStatus } from '../lidraughts/interfaces/game'
 
 const pieceScores = {
   man: 1,
@@ -26,6 +28,7 @@ export default class Draughtsground {
 
   attach(wrapper: HTMLElement, bounds: DOMRect): void {
     const isViewOnly = this.state.fixed || this.state.viewOnly
+    const isEdit = this.state.edit
     const board = document.createElement('div')
     board.className = 'cg-board'
     if (isViewOnly) board.className += ' view-only'
@@ -70,10 +73,21 @@ export default class Draughtsground {
       board.addEventListener('touchcancel', () => drag.cancel(this))
     }
 
+    if (!isViewOnly) {
+      external.subscribe(this.externalMove, this.redraw)
+      if (isEdit) {
+        if (external.features().getState)
+          external.onCentralGetState()
+      } else {
+        external.onCentralStateCreated(this.state)
+      }
+    }
+
     window.addEventListener('resize', this.onOrientationChange)
   }
 
   detach = () => {
+    // external.unsubscribe() // TODO: EditorCtrl detaches when started, uncomment after fix
     this.dom = undefined
     window.removeEventListener('resize', this.onOrientationChange)
   }
@@ -98,7 +112,7 @@ export default class Draughtsground {
         }
         cur = state.animation.current
         rest = 1
-      } else {
+    } else {
         state.animation.current = null
       }
     }
@@ -163,6 +177,7 @@ export default class Draughtsground {
     anim(state => setNewBoardState(state, config), this, false, noCaptSequences)
     if (this.state.selected && !this.state.pieces[this.state.selected])
       this.state.selected = null
+    external.onCentralStateChanged()
   }
 
   reconfigure(config: cg.InitConfig, animate?: boolean): void {
@@ -171,6 +186,7 @@ export default class Draughtsground {
       configureBoard(this.state, config)
       this.redraw()
     }
+    external.onCentralStateCreated(this.state)
   }
 
   toggleOrientation = (): void => {
@@ -185,6 +201,10 @@ export default class Draughtsground {
 
   setPieces(pieces: cg.PiecesDiff): void {
     anim(state => board.setPieces(state, pieces), this)
+  }
+
+  setLastPromotion(role?: Role) {
+    this.state.lastPromotion = role ? role : null
   }
 
   dragNewPiece(e: TouchEvent, piece: Piece, force = false): void {
@@ -209,6 +229,7 @@ export default class Draughtsground {
 
       if (config) {
         setNewBoardState(state, config)
+        external.onCentralStateChanged()
       }
 
     }, this)
@@ -221,6 +242,14 @@ export default class Draughtsground {
         setNewBoardState(state, config)
       }
     }, this)
+  }
+
+  externalMove = (orig: Key, dest: Key): void => {
+    const result = anim(state => {
+      return board.userMove(state, orig, dest)
+    }, this)
+    if (!result)
+      external.onMoveRejectedByCentral()
   }
 
   playPremove = (): boolean => {
@@ -266,9 +295,10 @@ export default class Draughtsground {
     skipAnim(state => board.cancelMove(state), this)
   }
 
-  stop = () => {
+  stop = (status?: GameStatus) => {
     drag.cancel(this)
     skipAnim(state => board.stop(state), this)
+    external.onCentralStateEnded(status)
   }
 
   explode = (keys: Key[]) => {

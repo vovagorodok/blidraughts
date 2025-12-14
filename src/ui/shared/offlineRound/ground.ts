@@ -14,6 +14,7 @@ function makeConfig(data: OfflineGameData, sit: GameSituation): cg.InitConfig {
   const pieceMoveConf = settings.game.pieceMove()
   const board = getVariantBoard(data.game.variant.key)
   return {
+    variant: data.game.variant.key,
     fen: sit.fen,
     boardSize: board.size,
     orientation: boardOrientation(data),

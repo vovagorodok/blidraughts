@@ -19,7 +19,6 @@ import sound from './sound'
 import { isForeground, setForeground, setBackground } from './utils/appMode'
 
 let firstConnection = true
-let isConnected = false
 
 export default function appInit(
   appInfo: Pick<AppInfo, 'version'>,
@@ -29,7 +28,6 @@ export default function appInit(
   sfMaxMem: number,
   cpuArch: string,
 ): void {
-
   window.lidraughts.cpuArch = cpuArch
 
   window.deviceInfo = {
@@ -55,7 +53,7 @@ export default function appInit(
     if (state.isActive) {
       sound.resume()
       setForeground()
-      session.refresh()?.then(() => {
+      session.refresh().then(() => {
         if (Capacitor.getPlatform() === 'ios') {
           Badge.setNumber({ badge: session.myTurnGames().length })
         }
@@ -63,7 +61,8 @@ export default function appInit(
       socket.cancelDelayedDisconnect()
       socket.connect()
       redraw()
-    } else {
+    }
+    else {
       setBackground()
       socket.delayedDisconnect(3 * 60 * 1000)
       lobby.appCancelSeeking()
@@ -71,14 +70,11 @@ export default function appInit(
   })
 
   Network.addListener('networkStatusChange', s => {
-    // event can be fired multiple times with same connected status
-    if (isConnected !== s.connected) {
-      isConnected = s.connected
-      if (s.connected) {
-        onOnline()
-      } else {
-        onOffline()
-      }
+    if (s.connected) {
+      onOnline()
+    }
+    else {
+      onOffline()
     }
   })
 
@@ -90,7 +86,6 @@ export default function appInit(
   // and also listen to online event in case network was disconnected at app
   // startup
   if (hasNetwork()) {
-    isConnected = true
     onOnline()
   } else {
     session.restoreStoredSession()
@@ -113,7 +108,7 @@ function onOnline() {
       getPools()
 
       session.rememberLogin()
-      ?.then(() => {
+      .then(() => {
         push.register()
         challengesApi.refresh()
         if (Capacitor.getPlatform() === 'ios') {
@@ -149,12 +144,12 @@ function onOffline() {
 // retry 5 times
 let nbRetries = 1
 function getPools() {
-  return xhr.lobby(true)
-    .then(redraw)
-    .catch(() => {
-      if (nbRetries <= 5) {
-        nbRetries++
-        setTimeout(getPools, nbRetries * 1000)
-      }
-    })
+  return xhr.lobby()
+  .then(redraw)
+  .catch(() => {
+    if (nbRetries <= 5) {
+      nbRetries++
+      setTimeout(getPools, nbRetries * 1000)
+    }
+  })
 }

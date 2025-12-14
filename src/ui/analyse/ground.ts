@@ -11,6 +11,7 @@ function makeConfig(
 ): cg.InitConfig {
   const pieceMoveConf = settings.game.pieceMove()
   return {
+    variant: config.variant,
     fen: config.fen,
     boardSize: config.boardSize,
     lastMove: config.lastMove,
@@ -19,6 +20,7 @@ function makeConfig(
     orientation,
     coordinates: settings.game.coords(),
     coordSystem: config.coordSystem,
+    otb: config.otb,
     movable: {
       free: false,
       color: config.movableColor,

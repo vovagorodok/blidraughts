@@ -113,11 +113,15 @@ export default {
         ['frisianovsky' ],
         ['eightbit', '8-bit']
       ],
-      background: prop('bgTheme', 'dark'),
+      background: prop('bgTheme', 'system'),
       board: prop('theme.board', 'brown'),
-      piece: prop('theme.piece', 'wide_crown')
+      piece: prop('theme.piece', 'fabirovsky')
     },
     vibrateOnGameEvents: prop('vibrateOnGameEvents', false),
+    bluetooth: {
+      useDevice: prop('bluetooth.useDevice', false),
+      deviceId: prop<string | undefined>('bluetooth.deviceId', undefined)
+    },
     notifications: {
       enable: prop<boolean>('notifications', true),
       vibrate: prop<boolean>('notifications.vibrate', true),

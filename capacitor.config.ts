@@ -2,11 +2,12 @@
 import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'org.lidraughts.mobileapp',
-  appName: 'lidraughts',
+  appId: 'com.vovagorodok.blidraughts',
+  appName: 'Blidraughts',
+  bundledWebRuntime: false,
   webDir: 'www',
   backgroundColor: '000000ff',
-  appendUserAgent: 'Lidrobile/2.3.0',
+  appendUserAgent: 'Lidrobile/2.3.0+ble2.4.0',
   plugins: {
     SplashScreen: {
       androidSplashResourceName: 'launch_splash',
@@ -17,11 +18,15 @@ const config: CapacitorConfig = {
       presentationOptions: ['sound', 'alert']
     }
   },
-  server: {
-    androidScheme: "http"
-  },
   ios: {
     scheme: 'lidraughts',
+  },
+  android: {
+    adjustMarginsForEdgeToEdge: 'force',
+  },
+  server: {
+    hostname: 'localhost',
+    androidScheme: 'http'
   }
 }
 

@@ -13,6 +13,7 @@ export function toggleOrientation(state: State): void {
 
 export function reset(state: State): void {
   state.lastMove = null
+  state.lastPromotion = null
   state.animateFrom = null
   setSelected(state, null)
   unsetPremove(state)
@@ -334,6 +335,7 @@ function baseMove(state: State, orig: Key, dest: Key, finishCapture?: boolean): 
     role: 'king',
     color: origPiece.color
   } as Piece : state.pieces[orig]
+  state.lastPromotion = destPiece.role != state.pieces[orig].role ? destPiece.role : null
   delete state.pieces[orig]
 
   if (captureUci && captKey) {

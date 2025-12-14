@@ -3,8 +3,11 @@ export type BoardSize = [number, number]
 
 export type Pieces = {[index: string]: Piece}
 export type PiecesDiff = {[index: string]: Piece | undefined}
+export type ChessPieces = Map<ChessKey, Piece>
+export type PeripheralPieces = Map<ChessKey, PeripheralPiece>
 
 export interface InitConfig {
+  variant?: VariantKey
   fen?: string
   boardSize?: BoardSize
   orientation?: Color
@@ -16,6 +19,7 @@ export interface InitConfig {
   coordSystem?: number
   viewOnly?: boolean
   fixed?: boolean
+  edit?: boolean
   otb?: boolean
   otbMode?: OtbMode
   highlight?: {
@@ -76,9 +80,9 @@ export interface InitConfig {
 
 export interface SetConfig {
   orientation?: Color
+  variant?: VariantKey
   fen?: string
   boardSize?: BoardSize
-  variant?: VariantKey,
   coordinates?: number
   coordSystem?: number
   lastMove?: Key[] | null
@@ -88,6 +92,9 @@ export interface SetConfig {
   movableColor?: Color | 'both' | null
   dests?: DestsMap | null
   kingMoves?: KingMoves | null
+  otb?: boolean
+  shift?: Shift | null
+  shiftView?: Shift | null
 }
 
 // {white: {pieces: {pawn: 3 queen: 1}, score: 6}, black: {pieces: {bishop: 2}, score: -6}
@@ -108,6 +115,7 @@ export interface MoveMetadata {
   holdTime?: number
   captured?: Piece
   predrop?: boolean
+  promote?: Role
 }
 
 export interface SetPremoveMetadata {
@@ -147,6 +155,11 @@ export interface PieceNode extends KeyedNode {
   cgDragging?: boolean
 }
 export type SquareNode = KeyedNode
+
+export interface ChessKeyedNode extends HTMLElement {
+  cgKey: ChessKey
+}
+export type ChessSquareNode = ChessKeyedNode
 
 export interface PrevData {
   boardSize: BoardSize | null

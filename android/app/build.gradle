@@ -1,8 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "org.lidraughts.mobileapp"
+    namespace "com.vovagorodok.blidraughts"
     compileSdk rootProject.ext.compileSdkVersion
+    buildFeatures {
+        buildConfig true
+    }
     defaultConfig {
         // configurations.all {
         //   resolutionStrategy {
@@ -10,7 +13,7 @@ android {
         //     force 'androidx.core:core-ktx:1.6.0'
         //   }
         // }
-        applicationId "org.lidraughts.mobileapp.free"
+        applicationId "com.vovagorodok.blidraughts"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -27,17 +30,12 @@ android {
             // shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             ndk {
-                debugSymbolLevel 'FULL'
+                debugSymbolLevel 'full'
             }
         }
     }
-    buildFeatures {
-        buildConfig = true
-    }
     packagingOptions {
-        jniLibs {
-            pickFirsts += ['lib/**/libc++_shared.so']
-        }
+        pickFirst 'lib/**/libc++_shared.so'
     }
 }
 

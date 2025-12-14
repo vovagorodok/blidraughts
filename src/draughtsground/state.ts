@@ -3,21 +3,26 @@ import { AnimCurrent } from './anim'
 import { DragCurrent } from './drag'
 
 export interface State {
+  variant: VariantKey
   pieces: cg.Pieces
   boardSize: cg.BoardSize
   orientation: Color // board orientation. white | black
   turnColor: Color // turn to play. white | black
   check: Key | null // square currently in check "a2"
   lastMove: Key[] | null // ucis of the last move [32, 27]
+  lastPromotion: Role | null
   animateFrom: number | null; // startindex in lastMove to animate
   selected: Key | null // square currently selected "32"
   coordinates: number // include coords attributes
   coordSystem?: number; // coordinate system (0 = fieldnumbers, 1 = algebraic)
   viewOnly: boolean // don't bind events: the user will never be able to move pieces around
   fixed: boolean // board is viewOnly and pieces won't move
+  edit: boolean // board is in edit mode
   exploding: cg.Exploding | null
   otb: boolean // is this an otb game?
   otbMode: cg.OtbMode
+  shift: Shift | null
+  shiftView: Shift | null
   highlight: {
     lastMove: boolean // add last-move class to squares
     kingMoves: boolean | null; // show amount of king moves for frisian variants
@@ -82,24 +87,39 @@ export interface State {
     dropNewPiece?: (piece: Piece, key: Key) => void
   }
   prev: cg.PrevData
+  peripheral: {
+    isMoveRejected: boolean,
+    lastMove: ChessKeyPair | null
+    lastPromotion: Role | null
+    isVariantSupported: boolean,
+    isSynchronized: boolean,
+    isGettable: boolean,
+    isSettable: boolean,
+    pieces: cg.PeripheralPieces
+  }
 }
 
 export function makeDefaults(): State {
   return {
+    variant: 'standard' as VariantKey,
     pieces: {},
     boardSize: [10, 10],
     orientation: 'white' as Color,
     turnColor: 'white' as Color,
     check: null,
     lastMove: null,
+    lastPromotion: null,
     animateFrom: null,
     selected: null,
     coordinates: 2,
     coordSystem: 1,
     otb: false,
     otbMode: 'none' as cg.OtbMode,
+    shift: null,
+    shiftView: null,
     viewOnly: false,
     fixed: false,
+    edit: false,
     exploding: null,
     highlight: {
       lastMove: true,
@@ -153,6 +173,16 @@ export function makeDefaults(): State {
       bounds: null,
       turnColor: null,
       otbMode: null
+    },
+    peripheral: {
+      isMoveRejected: false,
+      lastMove: null,
+      lastPromotion: null,
+      isVariantSupported: false,
+      isSynchronized: true,
+      isGettable: false,
+      isSettable: false,
+      pieces: new Map()
     }
   }
 }
