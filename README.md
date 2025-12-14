@@ -1,3 +1,8 @@
+# BLIDRAUGHTS
+
+<img src="./android/app/src/main/res/mipmap-hdpi/ic_launcher_foreground.png" width="100">\
+Fork of lidraughts.org mobile application with Bluetooth e-boards support
+
 [lidraughts.org/mobile](https://lidraughts.org/mobile)
 --------------------
 
@@ -15,13 +20,17 @@ Multi-variant draughts library is brought by [a JavaScript version of scaladraug
 
 ## Download
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
+     alt="Get it on F-Droid"
+     height="80">](https://f-droid.org/packages/com.vovagorodok.blidraughts/)
 [<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png"
      alt="Get it on Google Play"
-     height="74">](https://play.google.com/store/apps/details?id=org.lidraughts.mobileapp)
-[<img src="res/ios-badge.svg"
-     alt="Download on the App Store">](https://itunes.apple.com/us/app/lidraughts-online-draughts/id1485028698)
+     height="80">](https://play.google.com/store/apps/details?id=com.vovagorodok.blidraughts)
+<!-- [<img src="res/ios-badge.svg"
+     alt="Download on the App Store"
+     height="80">](https://itunes.apple.com/us/app/com.vovagorodok.blidraughts/id0000000000) -->
 
-or get the APK from the [Releases section](https://github.com/RoepStoep/lidrobile/releases/latest)
+or get the APK from the [Releases section](https://github.com/vovagorodok/blidraughts/releases/latest)
 
 ## Required dependencies
 
