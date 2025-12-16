@@ -4,7 +4,7 @@ import * as draughtsFormat from '../utils/draughtsFormat'
 import * as util from './util'
 
 export const initial = 'W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
-export const chessInitial = '1p1p1p1p/p1p1p1p1/1p1p1p1p/8/8/P1P1P1P1/1P1P1P1P/P1P1P1P1 w'
+export const chessInitial = '1m1m1m1m/m1m1m1m1/1m1m1m1m/8/8/M1M1M1M1/1M1M1M1M/M1M1M1M1 w'
 
 export function read(fen: string, fields?: number): cg.Pieces {
   const pieces: cg.Pieces = {}
@@ -202,25 +202,30 @@ export function readKingMoves(fen: string): cg.KingMoves | null {
 }
 
 const roles: {[i: string]: Role} = {
-  p: 'man',
-  r: 'man',
-  n: 'man',
-  b: 'man',
-  q: 'king',
-  k: 'king',
-  P: 'man',
-  R: 'man',
-  N: 'man',
-  B: 'man',
-  Q: 'king',
-  K: 'king'
+  m: 'man',
+  d: 'king',
+  p: 'unsupport',
+  r: 'unsupport',
+  n: 'unsupport',
+  b: 'unsupport',
+  q: 'unsupport',
+  k: 'unsupport',
+  M: 'man',
+  D: 'king',
+  P: 'unsupport',
+  R: 'unsupport',
+  N: 'unsupport',
+  B: 'unsupport',
+  Q: 'unsupport',
+  K: 'unsupport'
 }
 
 const letters = {
-  man: 'p',
-  king: 'q',
-  ghostman: 'p',
-  ghostking: 'q',
+  man: 'm',
+  king: 'd',
+  ghostman: 'm',
+  ghostking: 'd',
+  unsupport: 'm'
 }
 
 export function convertChessFenToPeripheralPieces(fen: string): cg.PeripheralPieces {

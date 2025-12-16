@@ -2,25 +2,30 @@ import isObject from 'lodash-es/isObject'
 import { san2alg as san2algMap } from '../draughtsground/util'
 
 const roleToChessUciMap = {
-  king: 'q',
-  man: 'p',
-  ghostman: 'p',
-  ghostking: 'q'
+  king: 'd',
+  man: 'm',
+  ghostman: 'm',
+  ghostking: 'd',
+  unsupport: 'm'
 }
 
 const chessUciToRoleMap: {[k: string]: Role } = {
-  P: 'man',
-  B: 'man',
-  N: 'man',
-  R: 'man',
-  Q: 'king',
-  K: 'king',
-  p: 'man',
-  b: 'man',
-  n: 'man',
-  r: 'man',
-  q: 'king',
-  k: 'king'
+  M: 'man',
+  D: 'king',
+  P: 'unsupport',
+  B: 'unsupport',
+  N: 'unsupport',
+  R: 'unsupport',
+  Q: 'unsupport',
+  K: 'unsupport',
+  m: 'man',
+  d: 'king',
+  p: 'unsupport',
+  b: 'unsupport',
+  n: 'unsupport',
+  r: 'unsupport',
+  q: 'unsupport',
+  k: 'unsupport'
 }
 
 const chessCols = ['a','b','c','d','e','f','g','h','i', 'j'];

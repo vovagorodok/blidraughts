@@ -15,7 +15,8 @@ const pieceScores = {
   man: 1,
   king: 2,
   ghostman: 0,
-  ghostking: 0
+  ghostking: 0,
+  unsupport: 0
 }
 
 export default class Draughtsground {
