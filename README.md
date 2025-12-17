@@ -10,6 +10,8 @@ Fork of lidraughts.org mobile application with Bluetooth e-boards support
 [![Lint and unit tests](https://github.com/RoepStoep/lidrobile/actions/workflows/checks.yml/badge.svg)](https://github.com/RoepStoep/lidrobile/actions/workflows/checks.yml)
 ![GitHub](https://img.shields.io/badge/license-GPL--3.0-orange)
 
+![lidraughts mobile screenshots](portfolio.jpg)
+
 Lidraughts mobile is the lidraughts.org official application, forked from [Lichess mobile](https://github.com/lichess-org/lichobile). It is written
 in [TypeScript](http://www.typescriptlang.org/), with a bit of Kotlin and Swift.
 It is a web application that accesses the native SDK, thanks to [Ionic capacitor](https://capacitor.ionicframework.com/).
