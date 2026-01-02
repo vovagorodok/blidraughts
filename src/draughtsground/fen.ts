@@ -1,7 +1,10 @@
 import * as cg from './interfaces'
 import { allKeys, algebraicKeys } from './util'
+import * as draughtsFormat from '../utils/draughtsFormat'
+import * as util from './util'
 
 export const initial = 'W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20'
+export const chessInitial = '1m1m1m1m/m1m1m1m1/1m1m1m1m/8/8/M1M1M1M1/1M1M1M1M/M1M1M1M1 w'
 
 export function read(fen: string, fields?: number): cg.Pieces {
   const pieces: cg.Pieces = {}
@@ -198,11 +201,122 @@ export function readKingMoves(fen: string): cg.KingMoves | null {
   return result
 }
 
+const roles: {[i: string]: Role} = {
+  m: 'man',
+  d: 'king',
+  p: 'unsupport',
+  r: 'unsupport',
+  n: 'unsupport',
+  b: 'unsupport',
+  q: 'unsupport',
+  k: 'unsupport',
+  M: 'man',
+  D: 'king',
+  P: 'unsupport',
+  R: 'unsupport',
+  N: 'unsupport',
+  B: 'unsupport',
+  Q: 'unsupport',
+  K: 'unsupport'
+}
+
+const letters = {
+  man: 'm',
+  king: 'd',
+  ghostman: 'm',
+  ghostking: 'd',
+  unsupport: 'm'
+}
+
+export function convertChessFenToPeripheralPieces(fen: string): cg.PeripheralPieces {
+  const pieces: cg.PeripheralPieces = new Map()
+  let row = 8
+  let col = 0
+  for (let i = 0; i < fen.length; i++) {
+    const c = fen[i]
+    switch (c) {
+      case ' ': return pieces
+      case '/':
+        --row
+        if (row === 0) return pieces
+        col = 0
+        break
+      default: {
+        const nb = ~~c
+        if (nb) col += nb
+        else {
+          ++col
+          const role = c.toLowerCase()
+          pieces.set(util.pos2chessKey([col, row] as cg.Pos), {
+            role: 'u?'.includes(role) ? undefined : roles[role],
+            color: role === '?' ? undefined : c === role ? 'black' : 'white'
+          })
+        }
+      }
+    }
+  }
+  return pieces
+}
+
+function convertPeripheralPiecesToFen(_pieces: cg.PeripheralPieces) {
+  return chessInitial
+  // return [8, 7, 6, 5, 4, 3, 2].reduce(
+  //   function(str, nb) {
+  //     return str.replace(new RegExp(Array(nb + 1).join('1'), 'g'), String(nb))
+  //   },
+  //   util.invRanks.map((y) => {
+  //     return util.ranks.map((x) => {
+  //       const piece = pieces.get(util.pos2key([x, y]))
+  //       if (piece) {
+  //         if (piece.role) {
+  //           const letter = letters[piece.role]
+  //           return piece.color === 'white' ? letter.toUpperCase() : letter
+  //         } else {
+  //           return piece.color ? (piece.color === 'white' ? 'U' : 'u') : '?'
+  //         }
+  //       } else return '1'
+  //     }).join('')
+  //   }).join('/'))
+}
+
+export function convertPiecesToChessPieces(pieces: cg.Pieces, boardSize: number): cg.ChessPieces {
+  const chessPieces: cg.ChessPieces = new Map()
+  for (const [key, piece] of Object.entries(pieces) as [Key, Piece][]) {
+    const chessKey = draughtsFormat.convertKeyToChessKey(key, boardSize)
+    chessPieces.set(chessKey, piece)
+  }
+  return chessPieces
+}
+
+export const ranks: readonly ChessRank[] = [1, 2, 3, 4, 5, 6, 7, 8]
+export const invRanks: readonly ChessRank[] = [8, 7, 6, 5, 4, 3, 2, 1]
+function convertPiecesToChessFen(pieces: cg.Pieces, boardSize: number) {
+  if (boardSize === 10)
+    return chessInitial
+  const chessPieces = convertPiecesToChessPieces(pieces, boardSize)
+  return [8, 7, 6, 5, 4, 3, 2].reduce(
+    function(str, nb) {
+      return str.replace(new RegExp(Array(nb + 1).join('1'), 'g'), String(nb))
+    },
+    invRanks.map((y) => {
+      return ranks.map((x) => {
+        const piece = chessPieces.get(util.pos2chessKey([x, y]))
+        if (piece) {
+          const letter = letters[piece.role]
+          return piece.color === 'white' ? letter.toUpperCase() : letter
+        } else return '1'
+      }).join('')
+    }).join('/'))
+}
+
 export default {
   initial,
   read,
   write,
   toggleCoordinates,
   countGhosts,
-  readKingMoves
+  readKingMoves,
+  convertChessFenToPeripheralPieces,
+  convertPeripheralPiecesToFen,
+  convertPiecesToChessFen
 }

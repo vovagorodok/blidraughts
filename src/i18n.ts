@@ -21,12 +21,12 @@ let dateFormat: Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, dateFor
 let dateTimeFormat: Intl.DateTimeFormat = new Intl.DateTimeFormat(undefined, dateTimeFormatOpts)
 
 export default function i18n(key: string, ...args: Array<string | number>): string {
-  const str = messages[key]
+  const str = messages[key] || untranslated[key]
   return str ? format(str, ...args) : key
 }
 
 export function i18nVdom(key: string, ...args: Array<Mithril.Child>): Mithril.Children {
-  const str = messages[key]
+  const str = messages[key] || untranslated[key]
   return str ? formatVdom(str, ...args) : key
 }
 
@@ -365,4 +365,19 @@ const defaultRegions: StringMap = {
   'nl': 'nl-NL',
   'pt': 'pt-PT',
   'zh': 'zh-CN',
+}
+
+const untranslated: StringMap = {
+  apiUnsupported: 'Your version of lichess app is too old! Please upgrade for free to the latest version.',
+  apiDeprecated: 'Upgrade for free to the latest lichess app! Support for this version will be dropped on %s.',
+  playerisInvitingYou: '%s is inviting you',
+  unsupportedVariant: 'Variant %s is not supported in this version',
+  notesSynchronizationHasFailed: 'Notes synchronization with lichess has failed, please try later.',
+  localEvalCaution: 'Caution: intensive usage will drain battery.',
+  incorrectThreefoldClaim: 'Incorrect threefold repetition claim.',
+  useBluetoothDevice: 'Use bluetooth device',
+  resetToDefault: 'Reset to default',
+  deviceOptions: 'Device options',
+  vibrateOnGameEvents: 'Vibrate on game events',
+  offline: 'Offline'
 }

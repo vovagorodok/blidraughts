@@ -22,6 +22,10 @@ export function configureBoard(state: State, config: cg.InitConfig): void {
 
   merge(state, config)
 
+  if (config.variant) {
+    state.variant = config.variant
+  }
+
   // if a fen was provided, replace the pieces
   if (config.fen) {
     state.pieces = fen.read(config.fen, board.boardFields(state))
@@ -44,6 +48,10 @@ export function configureBoard(state: State, config: cg.InitConfig): void {
   // fix move/premove dests
   if (state.selected) board.setSelected(state, state.selected)
 
+  if (config.edit) {
+    state.edit = config.edit
+  }
+
   // no need for such short animations
   if (!state.animation.duration || state.animation.duration < 100)
     state.animation.enabled = false
@@ -65,7 +73,9 @@ export function setNewBoardState(d: State, config: cg.SetConfig): void {
   if (config.variant) {
     d.movable.variant = config.variant
     d.premovable.variant = config.variant
+    d.variant = config.variant
   }
+
   if (config.fen) {
     d.pieces = fen.read(config.fen, board.boardFields(d))
   }
@@ -78,7 +88,10 @@ export function setNewBoardState(d: State, config: cg.SetConfig): void {
 
   if (config.orientation !== undefined) d.orientation = config.orientation
   if (config.turnColor !== undefined) d.turnColor = config.turnColor
-  
+  if (config.otb !== undefined) d.otb = config.otb
+  if (config.shift !== undefined) d.shift = config.shift
+  if (config.shiftView !== undefined) d.shiftView = config.shiftView
+
   if (config.dests !== undefined) {
     d.movable.dests = config.dests
   }

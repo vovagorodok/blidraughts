@@ -21,6 +21,9 @@
   fieldnumber
     width 10.0%;
     height 10.0%;
+  chesssquare
+    width 10.0%
+    height 10.0%
 .is64
   square
     width 12.5%
@@ -31,6 +34,9 @@
   fieldnumber
     width 12.5%;
     height 12.5%;
+  chesssquare
+    width 12.5%
+    height 12.5%
 
 square
   position absolute
@@ -46,6 +52,52 @@ square
       background radial-gradient(transparent 0%,transparent 80%,rgba(20,30,85,0.3) 80%)
   &.last-move
     background-color rgba(155, 199, 0, 0.41)
+  &.rejected-move
+    background-color rgba(199, 0, 109, 0.41)
+  &.piece-remove
+    background-color rgba(255, 60, 60, 0.50)
+  &.piece-add
+    background-color rgba(60, 255, 60, 0.50)
+  &.piece-replace
+    background-color rgba(60, 60, 255, 0.50)
+  .board-green .cg-board > &.last-move,
+  .board-green-plastic .cg-board > &.last-move,
+  .board-marble .cg-board > &.last-move
+    background-color: rgba(0, 155, 199, 0.41)
+  &.check
+    background radial-gradient(ellipse at center, rgba(255, 0, 0, 1) 0%, rgba(231, 0, 0, 1) 25%, rgba(169, 0, 0, 0) 89%, rgba(158, 0, 0, 0) 100%)
+  &.current-premove
+    background-color rgba(20, 30, 85, 0.5)
+  &.exploding1
+    background-color: rgba(255, 255, 255, 0.5);
+  &.exploding2
+    background-color: rgba(255, 0, 0, 0.5);
+    transition: background-color 0.1s;
+  &.selected
+    background-color rgba(216, 85, 0, 0.3)
+
+chesssquare
+  position absolute
+  top: 0
+  left: 0
+  &.move-dest
+    background radial-gradient(rgba(20, 85, 30, 0.5) 22%, #208530 0, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) 0)
+    &.occupied
+      background radial-gradient(transparent 0%,transparent 80%,rgba(20,85,0,0.3) 80%)
+  &.premove-dest
+    background radial-gradient(rgba(20, 30, 85, 0.5) 22%, #203085 0, rgba(0, 0, 0, 0.3) 0, rgba(0, 0, 0, 0) 0)
+    &.occupied
+      background radial-gradient(transparent 0%,transparent 80%,rgba(20,30,85,0.3) 80%)
+  &.last-move
+    background-color rgba(155, 199, 0, 0.41)
+  &.rejected-move
+    background-color rgba(199, 0, 109, 0.41)
+  &.piece-remove
+    background-color rgba(255, 60, 60, 0.50)
+  &.piece-add
+    background-color rgba(60, 255, 60, 0.50)
+  &.piece-replace
+    background-color rgba(60, 60, 255, 0.50)
   .board-green .cg-board > &.last-move,
   .board-green-plastic .cg-board > &.last-move,
   .board-marble .cg-board > &.last-move

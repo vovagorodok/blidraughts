@@ -1,6 +1,86 @@
 import isObject from 'lodash-es/isObject'
 import { san2alg as san2algMap } from '../draughtsground/util'
 
+const roleToChessUciMap = {
+  king: 'd',
+  man: 'm',
+  ghostman: 'm',
+  ghostking: 'd',
+  unsupport: 'm'
+}
+
+const chessUciToRoleMap: {[k: string]: Role } = {
+  M: 'man',
+  D: 'king',
+  P: 'unsupport',
+  B: 'unsupport',
+  N: 'unsupport',
+  R: 'unsupport',
+  Q: 'unsupport',
+  K: 'unsupport',
+  m: 'man',
+  d: 'king',
+  p: 'unsupport',
+  b: 'unsupport',
+  n: 'unsupport',
+  r: 'unsupport',
+  q: 'unsupport',
+  k: 'unsupport'
+}
+
+const chessCols = ['a','b','c','d','e','f','g','h','i', 'j'];
+
+export function convertKeyToChessKey(key: Key, boardSize: number): ChessKey {
+  const blackSquaresSize = boardSize / 2
+  const pos = parseInt(key, 10) - 1
+  const row = boardSize - Math.floor(pos / blackSquaresSize) - 1
+  const col = pos % blackSquaresSize
+  const colOffset = row % 2 === 0 ? 0 : 1
+  const chessCol = col * 2 + colOffset
+  const chessRow = row + 1
+  return `${chessCols[chessCol]}${chessRow}` as ChessKey
+}
+
+export function convertChessKeyToKey(chess: ChessKey, boardSize: number): Key | null {
+  const blackSquaresSize = boardSize / 2
+  const col = chessCols.indexOf(chess[0])
+  const row = parseInt(chess[1]) - 1
+  if (row % 2 !== col % 2) return null
+  const draughtsRow = boardSize - row - 1
+  const draughtsCol = Math.floor(col / 2)
+  const draughtsPos = draughtsRow * blackSquaresSize + draughtsCol + 1
+  return draughtsPos.toString().padStart(2, '0') as Key
+}
+
+export function chessUciToChessMove(uci: string): ChessKeyPair {
+  return [<ChessKey>uci.substr(0, 2), <ChessKey>uci.substr(2, 2)]
+}
+
+export function chessUciToMove(uci: string, boardSize: number): Key[] {
+  const pair: ChessKeyPair = chessUciToChessMove(uci)
+  const orig = convertChessKeyToKey(pair[0], boardSize)
+  const dest = convertChessKeyToKey(pair[1], boardSize)
+  if (orig !== null && dest !== null)
+    return [orig!, dest!]
+  else if (orig !== null)
+    return [orig!]
+  else if (dest !== null)
+    return [dest!]
+  return []
+}
+
+export function moveToChessUci(move: Key[], boardSize: number, prom?: Role): string {
+  const orig = convertKeyToChessKey(move[move.length - 2], boardSize)
+  const dest = convertKeyToChessKey(move[move.length - 1], boardSize)
+  if (prom) return orig + dest + roleToChessUciMap[prom]
+  return orig + dest
+}
+
+export function uciToProm(uci: string): Role | undefined {
+  const p = uci.substr(4, 1)
+  return chessUciToRoleMap[p]
+}
+
 export function uciToMove(uci: string): Key[] {
   return decomposeUci(uci)
 }

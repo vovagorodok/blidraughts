@@ -5,6 +5,7 @@ import * as cg from '../../draughtsground/interfaces'
 import * as cgDrag from '../../draughtsground/drag'
 import * as draughts from '../../draughts'
 import { toggleCoordinates } from '../../draughtsground/fen'
+import fenConv from '../../draughtsground/fen'
 import { getLidraughtsVariant, getInitialFen } from '../../lidraughts/variant'
 import { VariantKey } from '../../lidraughts/interfaces/variant'
 import router from '../../router'
@@ -17,6 +18,7 @@ import * as fenUtil from '../../utils/fen'
 import continuePopup, { Controller as ContinuePopupCtrl } from '../shared/continuePopup'
 import i18n from '../../i18n'
 import drag from './drag'
+import external from '../../externalDevice'
 
 const startingFen = 'W:W31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50:B1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20:H0:F1'
 
@@ -87,6 +89,7 @@ export default class EditorCtrl {
       fen: initFen,
       boardSize: this.getVariant().board.size,
       orientation: 'white',
+      edit: true,
       coordinates: settings.game.coords(),
       coordSystem: this.coordSystem(),
       movable: {
@@ -195,6 +198,11 @@ export default class EditorCtrl {
     } else {
       Toast.show({ text: i18n('invalidFen'), position: 'center', duration: 'short' })
     }
+  }
+
+  public loadPeripheralFen = () => {
+    const state = external.state()
+    this.loadNewFen(fenConv.convertPeripheralPiecesToFen(state.peripheral.pieces))
   }
 
   public goToAnalyse = () => {

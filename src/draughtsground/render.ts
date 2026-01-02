@@ -2,6 +2,7 @@ import * as cg from './interfaces'
 import { State } from './state'
 import { boardFields } from './board'
 import * as util from './util'
+import * as draughtsFormat from '../utils/draughtsFormat'
 
 /**
  * Board diffing and rendering logic. It runs in 3 main steps:
@@ -28,6 +29,7 @@ export function renderBoard(d: State, dom: cg.DOM) {
   const asWhite = d.orientation === 'white'
   const bs = d.boardSize
   const posToTranslate = d.fixed ? posToTranslateRel(bs) : posToTranslateAbs(dom.bounds, bs)
+  const chessPosToTranslate = d.fixed ? chessPosToTranslateRel(bs) : chessPosToTranslateAbs(dom.bounds, bs)
   const boardSizeChange = d.prev.boardSize && (d.prev.boardSize[0] !== d.boardSize[0] || d.prev.boardSize[1] !== d.boardSize[1])
   d.prev.boardSize = [d.boardSize[0], d.boardSize[1]]
   const orientationChange = d.prev.orientation && d.prev.orientation !== d.orientation
@@ -40,6 +42,7 @@ export function renderBoard(d: State, dom: cg.DOM) {
   const temporaryPieces = d.animation.current && d.animation.current.plan.captures
   const temporaryRoles = d.animation.current && d.animation.current.plan.tempRole
   const squares: Map<Key, string> = computeSquareClasses(d)
+  const chessSquares: Map<ChessKey, string> = computeChessSquareClasses(d)
   const samePieces: Set<Key> = new Set()
   const sameSquares: Set<Key> = new Set()
   const movedPieces: Map<string, cg.PieceNode[]> = new Map()
@@ -184,6 +187,16 @@ export function renderBoard(d: State, dom: cg.DOM) {
     }
   })
 
+  clearChessSquares(dom)
+  chessSquares.forEach((squareClass: string, k: ChessKey) => {
+      const se = document.createElement('chesssquare') as cg.ChessSquareNode
+      se.className = squareClass
+      se.cgKey = k
+      translate = chessPosToTranslate(util.chessKey2pos(k, bs), asWhite)
+      positionSquare(d, se, translate)
+      boardElement.insertBefore(se, boardElement.firstChild)
+  })
+
   // walk over all pieces in current state object, apply dom changes to moved
   // pieces or append new pieces
   for (let j = 0, jlen = piecesKeys.length; j < jlen; j++) {
@@ -279,6 +292,13 @@ function posToTranslateBase(pos: cg.Pos, boardSize: cg.BoardSize, asWhite: boole
   }
 }
 
+function chessPosToTranslateBase(pos: cg.Pos, boardSize: cg.BoardSize, asWhite: boolean, xFactor: number, yFactor: number): NumberPair {
+  return [
+    (!asWhite ? boardSize[0] - pos[0] : pos[0] - 1.0) * xFactor,
+    (!asWhite ? boardSize[1] - pos[1] : pos[1] - 1.0) * yFactor
+  ]
+}
+
 const posToTranslateAbs = (bounds: DOMRect, boardSize: cg.BoardSize) => {
   const xFactor = bounds.width / (boardSize[0] / 2), yFactor = bounds.height / boardSize[1]
   return (pos: cg.Pos, asWhite: boolean, shift: number) => posToTranslateBase(pos, boardSize, asWhite, xFactor, yFactor, shift)
@@ -286,6 +306,15 @@ const posToTranslateAbs = (bounds: DOMRect, boardSize: cg.BoardSize) => {
 
 export const posToTranslateRel = (boardSize: cg.BoardSize) => {
   return (pos: cg.Pos, asWhite: boolean, shift: number) => posToTranslateBase(pos, boardSize, asWhite, 2 * 100 / boardSize[0], 100 / boardSize[1], shift)
+}
+
+const chessPosToTranslateAbs = (bounds: DOMRect, boardSize: cg.BoardSize) => {
+  const xFactor = bounds.width / (boardSize[0]), yFactor = bounds.height / boardSize[1]
+  return (pos: cg.Pos, asWhite: boolean) => chessPosToTranslateBase(pos, boardSize, asWhite, xFactor, yFactor)
+}
+
+export const chessPosToTranslateRel = (boardSize: cg.BoardSize) => {
+  return (pos: cg.Pos, asWhite: boolean) => chessPosToTranslateBase(pos, boardSize, asWhite, 100 / boardSize[0], 100 / boardSize[1])
 }
 
 function positionPiece(d: State, el: HTMLElement, color: Color, pos: NumberPair) {
@@ -329,15 +358,58 @@ function pieceNameOf(p: Piece) {
   }
 }
 
+function addChessSquare(squares: Map<ChessKey, string>, key: ChessKey, klass: string) {
+  squares.set(key, (squares.get(key) || '') + ' ' + klass)
+}
+
+function computeChessSquareClasses(d: State): Map<ChessKey, string> {
+  const squares = new Map()
+  const centralPieces = d.pieces
+  const peripheralPieces = d.peripheral.pieces
+  const arePeripheralPiecesEmpty = !peripheralPieces.size
+
+  if (d.peripheral.isSynchronized || arePeripheralPiecesEmpty) {
+    if (d.peripheral.isVariantSupported && d.peripheral.isMoveRejected && d.peripheral.lastMove) {
+      addChessSquare(squares, d.peripheral.lastMove[0], 'rejected-move')
+      addChessSquare(squares, d.peripheral.lastMove[1], 'rejected-move')
+    }
+  }
+  else if (d.peripheral.isVariantSupported) {
+    for (const [key, centralPiece] of Object.entries(centralPieces)) {
+      const centralChessKey = draughtsFormat.convertKeyToChessKey(key as Key, d.boardSize[0])
+      const peripheralPiece = peripheralPieces.get(centralChessKey)
+      if (!peripheralPiece) {
+        addChessSquare(squares, centralChessKey, 'piece-add')
+      } else if ((peripheralPiece.role && peripheralPiece.role !== centralPiece.role) ||
+                 (peripheralPiece.color && peripheralPiece.color !== centralPiece.color)) {
+        addChessSquare(squares, centralChessKey, 'piece-replace')
+      }
+    }
+    for (const key of peripheralPieces.keys()) {
+      const centralKey = draughtsFormat.convertChessKeyToKey(key as ChessKey, d.boardSize[0])
+      if (centralKey === null || !centralPieces[centralKey]) {
+        addChessSquare(squares, key, 'piece-remove')
+      }
+    }
+  }
+  return squares
+}
+
 function addSquare(squares: Map<Key, string>, key: Key, klass: string) {
   squares.set(key, (squares.get(key) || '') + ' ' + klass)
 }
 
 function computeSquareClasses(d: State): Map<Key, string> {
   const squares = new Map()
-  if (d.lastMove && d.highlight.lastMove) d.lastMove.forEach((k) => {
-    if (k) addSquare(squares, k, 'last-move')
-  })
+  const peripheralPieces = d.peripheral.pieces
+  const arePeripheralPiecesEmpty = !peripheralPieces.size
+
+  if (d.peripheral.isSynchronized || arePeripheralPiecesEmpty) {
+    const isRejected = d.peripheral.isVariantSupported && d.peripheral.isMoveRejected && d.peripheral.lastMove
+    if (d.lastMove && d.highlight.lastMove && !isRejected) d.lastMove.forEach((k) => {
+      if (k) addSquare(squares, k, 'last-move')
+    })
+  }
 
   if (d.selected) {
     addSquare(squares, d.selected, 'selected')
@@ -419,6 +491,18 @@ function clearCoords(dom: cg.DOM) {
     for (let i = oldFields.length - 1; i >= 0; i--) {
       const field = oldFields[i]
       if (field.tagName === 'FIELDNUMBER') {
+        dom.board.removeChild(field)
+      }
+    }
+  }
+}
+
+function clearChessSquares(dom: cg.DOM) {
+  const oldFields = dom.board.children
+  if (oldFields && oldFields.length) {
+    for (let i = oldFields.length - 1; i >= 0; i--) {
+      const field = oldFields[i]
+      if (field.tagName === 'CHESSSQUARE') {
         dom.board.removeChild(field)
       }
     }

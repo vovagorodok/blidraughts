@@ -10,6 +10,7 @@ import { OfflineRoundInterface, Position, Material } from '../round'
 import Replay from './Replay'
 import { IDraughtsClock, IStageClock } from '../clock/interfaces'
 import { autoScroll, autoScrollInline, onReplayTap, getMoveEl } from '../round/util'
+import externalDevice from '../../../externalDevice'
 
 export function renderAntagonist(
   ctrl: OfflineRoundInterface,
@@ -68,6 +69,7 @@ export function renderGameActionsBar(ctrl: OfflineRoundInterface) {
       <button className="action_bar_button" data-icon="A"
         oncreate={helper.ontap(ctrl.goToAnalysis)}
       />
+      {renderAutocompleteButton(ctrl)}
       {renderBackwardButton(ctrl)}
       {renderForwardButton(ctrl)}
     </section>
@@ -139,21 +141,59 @@ export function renderInlineReplay(ctrl: OfflineRoundInterface) {
   }, renderMoves(ctrl.replay))
 }
 
-
-export function renderBackwardButton(ctrl: OfflineRoundInterface) {
-  return ctrl.replay ? h('button.action_bar_button.fa.fa-chevron-left', {
-    oncreate: helper.ontap(ctrl.jumpPrev, ctrl.jumpFirst),
+export function renderAutocompleteButton(ctrl: OfflineRoundInterface) {
+  const peripheral = ctrl.draughtsground.state.peripheral
+  const enabled = !peripheral.isSynchronized && peripheral.isSettable
+  return externalDevice.features().setState ? h('button.action_bar_button.fa.fa-magic', {
+    oncreate: helper.ontap(externalDevice.onCentralSetState),
     className: helper.classSet({
-      disabled: !(ctrl.replay.ply > ctrl.firstPly())
+      disabled: !enabled,
     })
   }) : null
 }
 
-export function renderForwardButton(ctrl: OfflineRoundInterface) {
-  return ctrl.replay ? h('button.action_bar_button.fa.fa-chevron-right', {
-    oncreate: helper.ontap(ctrl.jumpNext, ctrl.jumpLast),
+function canJumpPrev(ctrl: OfflineRoundInterface) {
+  return ctrl.replay && ctrl.replay.ply > ctrl.firstPly()
+}
+
+export function renderBackwardButton(ctrl: OfflineRoundInterface) {
+  const jumpPrev = () => {
+    if (canJumpPrev(ctrl)) {
+      ctrl.jumpPrev()
+    }
+  }
+  const jumpFirst = () => {
+    if (canJumpPrev(ctrl)) {
+      ctrl.jumpFirst()
+    }
+  }
+  return ctrl.replay ? h('button.action_bar_button.fa.fa-chevron-left', {
+    oncreate: helper.ontap(jumpPrev, jumpFirst),
     className: helper.classSet({
-      disabled: !(ctrl.replay.ply < ctrl.lastPly())
+      disabled: !canJumpPrev(ctrl),
+    })
+  }) : null
+}
+
+function canJumpNext(ctrl: OfflineRoundInterface) {
+  return ctrl.replay && ctrl.replay.ply < ctrl.lastPly()
+}
+
+export function renderForwardButton(ctrl: OfflineRoundInterface) {
+  const jumpNext = () => {
+    if (canJumpNext(ctrl)) {
+      ctrl.jumpNext()
+    }
+  }
+  const jumpLast = () => {
+    if (canJumpNext(ctrl)) {
+      ctrl.jumpLast()
+    }
+  }
+  return ctrl.replay ? h('button.action_bar_button.fa.fa-chevron-right', {
+    oncreate: helper.ontap(jumpNext, jumpLast),
+    className: helper.classSet({
+      disabled: !canJumpNext(ctrl)
     })
   }) : null
 }

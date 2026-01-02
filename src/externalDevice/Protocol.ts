@@ -1,0 +1,23 @@
+import { Features } from './Features'
+import { Variants } from './Variants'
+import { Options } from './Options'
+import { State } from '../draughtsground/state'
+import { GameStatus } from '../lidraughts/interfaces/game'
+
+export interface Protocol {
+  init(st: State): void
+  features(): Features
+  variants(): Variants
+  options(): Options
+
+  onPeripheralCommand(cmd: string): void
+  onCentralStateCreated(st: State): void
+  onCentralStateChanged(): void
+  onCentralStateShifted(shift: Shift): void
+  onCentralStateEnded(status?: GameStatus): void
+  onMoveRejectedByCentral(): void
+
+  onCentralGetState(): void
+  onCentralSetState(): void
+  onCentralOptionsReset(): void
+}

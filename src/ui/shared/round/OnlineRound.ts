@@ -129,7 +129,7 @@ export default class OnlineRound implements OnlineRoundInterface {
 
     this.socket = new RoundSocket(this, this.onFeatured)
 
-    this.chat = (session.isKidMode() || this.data.tv || (!this.data.player.spectator && (this.data.game.tournamentId || this.data.opponent.ai))) ? null : new Chat(
+    this.chat = (session.isKidMode() || !session.isConnected() || this.data.tv || (!this.data.player.spectator && (this.data.game.tournamentId || this.data.opponent.ai))) ? null : new Chat(
       this.socket.iface,
       this.data.game.id,
       this.data.chat || [],
@@ -292,7 +292,7 @@ export default class OnlineRound implements OnlineRoundInterface {
     return this.data.steps[ply - this.firstPly()]
   }
 
-  public jump = (ply: number) => {
+  public jump = (ply: number, shift?: Shift) => {
     if (ply < this.firstPly() || ply > this.lastPly()) return false
     const plyDiff = Math.abs(ply - this.vm.ply)
     const wasReplaying = this.replaying()
@@ -301,9 +301,11 @@ export default class OnlineRound implements OnlineRoundInterface {
     const s = this.plyStep(ply)
     const ghosts = countGhosts(s.fen)
     const config: cg.SetConfig = {
+      variant: this.data.game.variant.key,
       fen: s.fen,
       lastMove: s.uci ? draughtsFormat.uciToMove(s.uci) : null,
-      turnColor: (this.vm.ply - (ghosts === 0 ? 0 : 1)) % 2 === 0 ? 'white' : 'black'
+      turnColor: (this.vm.ply - (ghosts === 0 ? 0 : 1)) % 2 === 0 ? 'white' : 'black',
+      shiftView: shift,
     }
     if (!this.replaying()) {
       config.movableColor = gameApi.isPlayerPlaying(this.data) ? this.data.player.color : null
@@ -326,19 +328,19 @@ export default class OnlineRound implements OnlineRoundInterface {
   }
 
   public jumpNext = () => {
-    return this.jump(this.vm.ply + 1)
+    return this.jump(this.vm.ply + 1, 'redo')
   }
 
   public jumpPrev = () => {
-    return this.jump(this.vm.ply - 1)
+    return this.jump(this.vm.ply - 1, 'undo')
   }
 
   public jumpFirst = () => {
-    return this.jump(this.firstPly())
+    return this.jump(this.firstPly(), 'undo')
   }
 
   public jumpLast = () => {
-    return this.jump(this.lastPly())
+    return this.jump(this.lastPly(), 'redo')
   }
 
   public isClockRunning(): boolean {
@@ -497,6 +499,8 @@ export default class OnlineRound implements OnlineRoundInterface {
       }
     }
 
+    this.draughtsground.setLastPromotion(o.promotion ? o.promotion.pieceClass : undefined)
+
     if (o.clock) {
       const c = o.clock
       if (this.clock) {
@@ -586,7 +590,7 @@ export default class OnlineRound implements OnlineRoundInterface {
     d.opponent.offeringDraw = false
 
     this.userJump(this.lastPly())
-    this.draughtsground.stop()
+    this.draughtsground.stop(o.status)
 
     if (this.vm.submitFeedback) {
       this.vm.submitFeedback = undefined

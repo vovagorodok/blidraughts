@@ -1,4 +1,4 @@
-package org.lidraughts.mobileapp;
+package com.vovagorodok.blidraughts;
 
 import android.os.Build;
 import android.view.View;

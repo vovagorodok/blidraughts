@@ -418,7 +418,9 @@ export default class AnalyseCtrl {
     const pathChanged = path !== this.path
     const oldPly = this.node.displayPly ? this.node.displayPly : this.node.ply
     this.setPath(path)
-    this.updateBoard(Math.abs(oldPly - (this.node.displayPly ? this.node.displayPly : this.node.ply)) > 1)
+    this.updateBoard(
+      Math.abs(oldPly - (this.node.displayPly ? this.node.displayPly : this.node.ply)) > 1,
+      direction !== undefined ? direction === 'forward' ? 'redo' : 'undo' : undefined)
     this.fetchOpening()
     if (this.node && this.node.san && direction === 'forward') {
       if (this.node.san.indexOf('x') !== -1) sound.throttledCapture()
@@ -747,16 +749,16 @@ export default class AnalyseCtrl {
 
   private debouncedStartCeval = debounce(this.startCeval, 500, { trailing: true })
 
-  private updateBoard(noCaptSequences = false) {
+  private updateBoard(noCaptSequences = false, shift?: Shift) {
     const node = this.node
 
     const color: Color = util.plyColor(node.ply)
     const dests = draughtsFormat.readDests(node.dests)
     const board = this.data.game.variant.board || getVariantBoard(this.data.game.variant.key)
     const config = {
+      variant: this.data.game.variant.key,
       fen: node.fen,
       boardSize: board.size,
-      variant: this.data.game.variant.key,
       coordinates: settings.game.coords(),
       coordSystem: this.coordSystem(),
       turnColor: color,
@@ -765,7 +767,9 @@ export default class AnalyseCtrl {
       dests: dests || null,
       captureLength: node.captLen,
       captureUci: (settings.analyse.fullCapture() && this.node.destsUci && this.node.destsUci.length) ? this.node.destsUci.concat() : undefined,
-      lastMove: node.uci ? draughtsFormat.uciToMoveOrDrop(node.uci) : null
+      lastMove: node.uci ? draughtsFormat.uciToMoveOrDrop(node.uci) : null,
+      otb: true,
+      shift: shift,
     }
 
     this.cgConfig = config

@@ -226,14 +226,15 @@ export default class OtbRound implements OtbRoundInterface, PromotingInterface {
   }
 
   private onFlag = (color: Color) => {
+    const status = {id: 35, name: 'outoftime'}
     const winner = color === 'white' ? 'black' : 'white'
-    setResult(this, {id: 35, name: 'outoftime'}, winner)
+    setResult(this, status, winner)
     sound.dong()
-    this.onGameEnd()
+    this.onGameEnd(status)
     this.save()
   }
 
-  public apply(sit: draughts.GameSituation) {
+  public apply(sit: draughts.GameSituation, shift?: Shift) {
     if (sit) {
       if (this.clock && this.clock.activeSide() !== sit.player) {
         this.clock.toggleActiveSide()
@@ -246,7 +247,8 @@ export default class OtbRound implements OtbRoundInterface, PromotingInterface {
         lastMove: lastUci ? draughtsFormat.uciToMoveOrDrop(lastUci) : null,
         dests: sit.dests,
         captureLength: sit.captureLength,
-        movableColor: sit.player
+        movableColor: sit.player,
+        shift: shift
       })
     }
   }
@@ -260,7 +262,7 @@ export default class OtbRound implements OtbRoundInterface, PromotingInterface {
     this.apply(sit)
     setResult(this, sit.status)
     if (gameStatusApi.finished(this.data)) {
-      this.onGameEnd()
+      this.onGameEnd(sit.status)
     }
     this.save()
     redraw()
@@ -269,14 +271,14 @@ export default class OtbRound implements OtbRoundInterface, PromotingInterface {
   public onThreefoldRepetition = (newStatus: GameStatus) => {
     setResult(this, newStatus)
     this.save()
-    this.onGameEnd()
+    this.onGameEnd(newStatus)
   }
 
-  public onGameEnd = () => {
+  public onGameEnd = (status?: GameStatus) => {
     if (this.clock && this.clock.isRunning()) {
       this.clock.startStop()
     }
-    this.draughtsground.stop()
+    this.draughtsground.stop(status)
     setTimeout(() => {
       this.actions.open()
       redraw()
@@ -287,18 +289,18 @@ export default class OtbRound implements OtbRoundInterface, PromotingInterface {
     return this.replay?.situation().player || 'white'
   }
 
-  public jump = (ply: number): false => {
+  public jump = (ply: number, shift?: Shift): false => {
     this.draughtsground.cancelMove()
     if (ply < 0 || ply >= this.replay!.situations.length) return false
     this.replay!.ply = ply
-    this.apply(this.replay!.situation())
+    this.apply(this.replay!.situation(), shift)
     return false
   }
 
-  public jumpNext = () => this.jump(this.replay!.ply + 1)
-  public jumpPrev = () => this.jump(this.replay!.ply - 1)
-  public jumpFirst = () => this.jump(this.firstPly())
-  public jumpLast = () => this.jump(this.lastPly())
+  public jumpNext = () => this.jump(this.replay!.ply + 1, 'redo')
+  public jumpPrev = () => this.jump(this.replay!.ply - 1, 'undo')
+  public jumpFirst = () => this.jump(this.firstPly(), 'undo')
+  public jumpLast = () => this.jump(this.lastPly(), 'redo')
 
   public firstPly = () => 0
   public lastPly = () => this.replay!.situations.length - 1

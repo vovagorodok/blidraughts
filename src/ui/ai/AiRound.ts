@@ -288,7 +288,7 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
     vibrate.tap()
   }
 
-  public apply(sit: draughts.GameSituation) {
+  public apply(sit: draughts.GameSituation, shift?: Shift) {
     if (sit) {
       const lastUci = sit.uciMoves.length ? sit.uciMoves[sit.uciMoves.length - 1] : null
       this.draughtsground.set({
@@ -297,7 +297,8 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
         lastMove: lastUci ? draughtsFormat.uciToMoveOrDrop(lastUci) : null,
         dests: sit.dests,
         captureLength: sit.captureLength || 0,
-        movableColor: sit.player === this.data.player.color ? sit.player : null
+        movableColor: sit.player === this.data.player.color ? sit.player : null,
+        shift: shift,
       })
     }
   }
@@ -307,7 +308,7 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
     this.apply(sit)
     setResult(this, sit.status)
     if (gameStatusApi.finished(this.data)) {
-      this.onGameEnd()
+      this.onGameEnd(sit.status)
     } else if (!this.engineNextMove && this.isEngineToMove()) {
       this.engineMove()
     }
@@ -318,16 +319,16 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
   public onThreefoldRepetition = (newStatus: GameStatus) => {
     setResult(this, newStatus)
     this.save()
-    this.onGameEnd()
+    this.onGameEnd(newStatus)
   }
 
-  public onGameEnd = () => {
+  public onGameEnd = (status?: GameStatus) => {
     if (this.engineNextMove) {
       clearTimeout(this.engineNextMove)
       this.engineNextMove = undefined
     }
-    this.draughtsground.cancelMove()
-    this.draughtsground.stop()
+    // this.draughtsground.cancelMove()
+    this.draughtsground.stop(status)
     setTimeout(() => {
       this.actions.open()
       redraw()
@@ -335,9 +336,10 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
   }
 
   public resign = () => {
-    setResult(this, { id: 31, name: 'resign' }, oppositeColor(this.data.player.color))
+    const status = { id: 31, name: 'resign' }
+    setResult(this, status, oppositeColor(this.data.player.color))
     this.save()
-    this.onGameEnd()
+    this.onGameEnd(status)
   }
 
   private firstPlayerColor(): Color {
@@ -352,33 +354,33 @@ export default class AiRound implements AiRoundInterface, PromotingInterface {
     return this.replay!.situations.length - 1
   }
 
-  public jump = (ply: number) => {
+  public jump = (ply: number, shift?: Shift) => {
     this.draughtsground.cancelMove()
     if (this.replay!.ply === ply || ply < 0 || ply >= this.replay!.situations.length) return false
     this.replay!.ply = ply
-    this.apply(this.replay!.situation())
+    this.apply(this.replay!.situation(), shift)
     return false
   }
 
-  public jumpFirst = () => this.jump(this.firstPly())
+  public jumpFirst = () => this.jump(this.firstPly(), 'undo')
 
   public jumpPrev = () => {
     const ply = this.replay!.ply
     if (this.data.player.color === oppositeColor(this.firstPlayerColor())) {
       const offset = ply % 2 === 0 ? 1 : 2
-      return this.jump(ply - offset)
+      return this.jump(ply - offset, 'undo')
     } else {
       const offset = ply % 2 === 0 ? 2 : 1
-      return this.jump(ply - offset)
+      return this.jump(ply - offset, 'undo')
     }
   }
 
   public jumpNext = () => {
     const ply = this.replay!.ply
-    return this.jump(ply + (ply + 2 >= this.replay!.situations.length ? 1 : 2))
+    return this.jump(ply + (ply + 2 >= this.replay!.situations.length ? 1 : 2), 'redo')
   }
 
-  public jumpLast = () => this.jump(this.lastPly())
+  public jumpLast = () => this.jump(this.lastPly(), 'redo')
 
   public canDrop = () => true
 }

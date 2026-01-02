@@ -21,6 +21,7 @@ function makeConfig(data: OnlineGameData, fen: string, flip = false, step?: Game
   const pieceMoveConf = settings.game.pieceMove()
 
   return {
+    variant: data.game.variant.key,
     fen: fen,
     boardSize: data.game.variant.board.size,
     orientation: boardOrientation(data, flip),

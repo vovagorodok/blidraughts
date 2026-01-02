@@ -8,6 +8,14 @@ export function easeInOutCubic(t: number): number {
   return t < 0.5 ? 4 * t * t * t : (t - 1) * (2 * t - 2) * (2 * t - 2) + 1
 }
 
+export function pos2chessKey(pos: cg.Pos): ChessKey {
+  return (files[pos[0] - 1] + pos[1]) as ChessKey
+}
+
+export function chessKey2pos(k: ChessKey, s: cg.BoardSize): cg.Pos {
+  return [k.charCodeAt(0) - 96, s[1] - (k.charCodeAt(1) - 48) + 1] as cg.Pos
+}
+
 export const pos2key = (pos: cg.Pos, s: cg.BoardSize): Key => allKeys[pos[0] + (s[0] / 2) * (pos[1] - 1) - 1]
 export const field2key = (n: number): Key => n < 10 ? ('0' + n.toString()) as Key : n.toString() as Key
 

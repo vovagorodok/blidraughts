@@ -40,7 +40,7 @@ function renderBody() {
           settings.general.notifications.enable,
           isOn => {
             if (isOn) {
-              push.register(true)
+              push.register()
             } else {
               push.unregister()
             }

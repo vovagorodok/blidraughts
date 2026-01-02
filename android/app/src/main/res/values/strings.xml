@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">lidraughts</string>
-    <string name="title_activity_main">lidraughts</string>
-    <string name="package_name">org.lidraughts.mobileapp</string>
-    <string name="custom_url_scheme">org.lidraughts.mobileapp</string>
+    <string name="app_name">Blidraughts</string>
+    <string name="title_activity_main">Blidraughts</string>
+    <string name="package_name">com.vovagorodok.blidraughts</string>
+    <string name="custom_url_scheme">com.vovagorodok.blidraughts</string>
 </resources>
