@@ -1,6 +1,6 @@
 {
   "name": "lidrobile",
-  "version": "2.3.0+ble2.4.0",
+  "version": "2.3.0+ble2.5.0",
   "description": "lidraughts.org mobile application with Bluetooth e-boards support",
   "repository": {
     "type": "git",
