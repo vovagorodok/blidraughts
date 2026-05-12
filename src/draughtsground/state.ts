@@ -95,6 +95,7 @@ export interface State {
     isSynchronized: boolean,
     isGettable: boolean,
     isSettable: boolean,
+    isStateKnown: boolean,
     pieces: cg.PeripheralPieces
   }
 }
@@ -182,6 +183,7 @@ export function makeDefaults(): State {
       isSynchronized: true,
       isGettable: false,
       isSettable: false,
+      isStateKnown: false,
       pieces: new Map()
     }
   }

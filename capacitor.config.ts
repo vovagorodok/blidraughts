@@ -7,7 +7,7 @@ const config: CapacitorConfig = {
   bundledWebRuntime: false,
   webDir: 'www',
   backgroundColor: '000000ff',
-  appendUserAgent: 'Lidrobile/2.3.0+ble2.5.0',
+  appendUserAgent: 'Lidrobile/2.3.0+ble2.5.1',
   plugins: {
     SplashScreen: {
       androidSplashResourceName: 'launch_splash',

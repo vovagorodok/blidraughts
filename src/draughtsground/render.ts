@@ -366,9 +366,8 @@ function computeChessSquareClasses(d: State): Map<ChessKey, string> {
   const squares = new Map()
   const centralPieces = d.pieces
   const peripheralPieces = d.peripheral.pieces
-  const arePeripheralPiecesEmpty = !peripheralPieces.size
 
-  if (d.peripheral.isSynchronized || arePeripheralPiecesEmpty) {
+  if (d.peripheral.isSynchronized || !d.peripheral.isStateKnown) {
     if (d.peripheral.isVariantSupported && d.peripheral.isMoveRejected && d.peripheral.lastMove) {
       addChessSquare(squares, d.peripheral.lastMove[0], 'rejected-move')
       addChessSquare(squares, d.peripheral.lastMove[1], 'rejected-move')
@@ -401,10 +400,8 @@ function addSquare(squares: Map<Key, string>, key: Key, klass: string) {
 
 function computeSquareClasses(d: State): Map<Key, string> {
   const squares = new Map()
-  const peripheralPieces = d.peripheral.pieces
-  const arePeripheralPiecesEmpty = !peripheralPieces.size
 
-  if (d.peripheral.isSynchronized || arePeripheralPiecesEmpty) {
+  if (d.peripheral.isSynchronized || !d.peripheral.isStateKnown) {
     const isRejected = d.peripheral.isVariantSupported && d.peripheral.isMoveRejected && d.peripheral.lastMove
     if (d.lastMove && d.highlight.lastMove && !isRejected) d.lastMove.forEach((k) => {
       if (k) addSquare(squares, k, 'last-move')
